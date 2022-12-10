@@ -35,7 +35,11 @@ function onInputChange(evt) {
         clearCountryList();
       }
     })
-    .catch(error => Notify.failure('Oops, there is no country with that name'));
+    .catch(error => {
+      Notify.failure('Oops, there is no country with that name');
+      clearCountryInfo();
+      clearCountryList();
+    });
 }
 
 function getListOfCountriesMarkup(array) {
