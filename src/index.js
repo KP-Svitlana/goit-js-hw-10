@@ -74,7 +74,7 @@ function getCountryMarkUp(array) {
       <p><span class="country-title">Population: </span>${population}</p>
       <p><span class="country-title">Languages: </span>${Object.values(
         languages
-      )}</p>`
+      ).join(', ')}</p>`
   );
 }
 
