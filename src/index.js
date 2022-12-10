@@ -11,23 +11,34 @@ const countryInfo = document.querySelector('.country-info');
 input.addEventListener('input', debounce(onInputChange, DEBOUNCE_DELAY));
 
 function onInputChange(evt) {
-  fetchCountries(evt.target.value)
+  const inputContent = evt.target.value.trim();
+  if (inputContent === '') {
+    clearCountryList();
+    clearCountryInfo();
+    return;
+  }
+  fetchCountries(inputContent)
     .then(data => {
       if (data.length > 10) {
         Notify.info(
           'Too many matches found. Please enter a more specific name.'
         );
+        clearCountryList();
+        clearCountryInfo();
       } else if (data.length <= 10 && data.length > 1) {
+        clearCountryList();
         renderListOfCountries(data);
+        clearCountryInfo();
       } else {
+        clearCountryInfo();
         renderCountryInfo(data);
+        clearCountryList();
       }
     })
     .catch(error => Notify.failure('Oops, there is no country with that name'));
 }
 
 function getListOfCountriesMarkup(array) {
-  console.log(array);
   return array
     .map(
       ({ name, flags }) => `<li class="country-item">
@@ -69,4 +80,12 @@ function getCountryMarkUp(array) {
 
 function renderCountryInfo(array) {
   countryInfo.insertAdjacentHTML('beforeend', getCountryMarkUp(array));
+}
+
+function clearCountryList() {
+  countyList.innerHTML = '';
+}
+
+function clearCountryInfo() {
+  countryInfo.innerHTML = '';
 }

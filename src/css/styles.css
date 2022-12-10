@@ -50,3 +50,8 @@ img {
 .country-title {
   font-weight: 500;
 }
+
+.country-info,
+.country-list {
+  padding-left: 20px;
+}
