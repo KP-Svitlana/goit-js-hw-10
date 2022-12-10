@@ -1,30 +1,38 @@
 import './css/styles.css';
 import debounce from 'lodash.debounce';
 import { fetchCountries } from './fetchCountries';
+import Notiflix, { Notify } from 'notiflix';
 
 const DEBOUNCE_DELAY = 300;
 const input = document.querySelector('#search-box');
 const countyList = document.querySelector('.country-list');
+const countryInfo = document.querySelector('.country-info');
 
-input.addEventListener(
-  'input',
-  debounce(onInputChange, 300, {
-    leading: true,
-    trailing: false,
-  })
-);
+input.addEventListener('input', debounce(onInputChange, DEBOUNCE_DELAY));
 
 function onInputChange(evt) {
-  input.textContent = evt.currentTarget.value;
-  fetchCountries(input.textContent).then(data => renderListOfCountries(data));
+  fetchCountries(evt.target.value)
+    .then(data => {
+      if (data.length > 10) {
+        Notify.info(
+          'Too many matches found. Please enter a more specific name.'
+        );
+      } else if (data.length <= 10 && data.length > 1) {
+        renderListOfCountries(data);
+      } else {
+        renderCountryInfo(data);
+      }
+    })
+    .catch(error => Notify.failure('Oops, there is no country with that name'));
 }
 
 function getListOfCountriesMarkup(array) {
+  console.log(array);
   return array
     .map(
-      country => `<li class="contry-item">
-        <img src="${country.flags}" alt="flag of ${country.name}" width="50px" height="50px" />
-        <span>${country.name}</span>
+      ({ name, flags }) => `<li class="country-item">
+        <img src="${flags.svg}" alt="flag of ${name.official}" width="80px" height="50px" />
+        <span>${name.official}</span>
       </li>`
     )
     .join('');
@@ -38,11 +46,27 @@ function renderListOfCountries(arrayOfContries) {
 }
 
 function getCountryMarkUp(array) {
-  return `<div class="country-name">
-        <img src="${array.flag.svg}" alt="${array.name}" width="40px" height="40px">
-        <span>${array.name}</span>
+  return array.map(
+    ({
+      flags,
+      name,
+      capital,
+      population,
+      languages,
+    }) => `<div class="country-name">
+        <img src="${flags.svg}" alt="${
+      name.official
+    }" width="80px" height="50px">
+        <span>${name.official}</span>
       </div>
-      <p>Capital: ${array.capital}</p>
-      <p>Population: ${array.population}</p>
-      <p>Languages: ${array.languages}</p>`;
+      <p><span class="country-title">Capital: </span> ${capital}</p>
+      <p><span class="country-title">Population: </span>${population}</p>
+      <p><span class="country-title">Languages: </span>${Object.values(
+        languages
+      )}</p>`
+  );
+}
+
+function renderCountryInfo(array) {
+  countryInfo.insertAdjacentHTML('beforeend', getCountryMarkUp(array));
 }
